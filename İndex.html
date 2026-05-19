@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barkod & Stok Takip</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        input, button { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #218838; }
+        .urun-listesi { margin-top: 20px; }
+        .urun-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #ddd; background: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Stok Takip Sistemi</h2>
+    
+    <!-- Ürün Ekleme Formu -->
+    <input type="text" id="barkod" placeholder="Barkod Numarası veya Ürün Kodu">
+    <input type="text" id="urunAdi" placeholder="Ürün Adı (Örn: Kağıt Havlu)">
+    <input type="number" id="urunAdet" placeholder="Stok Adedi">
+    <button onclick="urunEkle()">Ürünü Depoya Ekle</button>
+
+    <!-- Stok Listesi -->
+    <div class="urun-listesi" id="urunListesi">
+        <!-- Eklenen ürünler buraya gelecek -->
+    </div>
+</div>
+
+<script>
+    // Şimdilik basit bir ekleme fonksiyonu, daha sonra bunu geliştireceğiz ve hafızaya kaydedeceğiz
+    function urunEkle() {
+        let barkod = document.getElementById('barkod').value;
+        let ad = document.getElementById('urunAdi').value;
+        let adet = document.getElementById('urunAdet').value;
+
+        if(!barkod || !ad || !adet) {
+            alert("Lütfen tüm alanları doldurun!");
+            return;
+        }
+
+        let liste = document.getElementById('urunListesi');
+        let yeniUrun = document.createElement('div');
+        yeniUrun.className = 'urun-item';
+        yeniUrun.innerHTML = `<span><strong>${ad}</strong> (${barkod})</span> <span>${adet} Adet</span>`;
+        
+        liste.appendChild(yeniUrun);
+
+        // Formu temizle
+        document.getElementById('barkod').value = '';
+        document.getElementById('urunAdi').value = '';
+        document.getElementById('urunAdet').value = '';
+    }
+</script>
+
+</body>
+</html>
