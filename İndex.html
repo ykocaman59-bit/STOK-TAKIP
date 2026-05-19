@@ -3,53 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stok Takip Otomasyonu v2</title>
+    <title>Stok Takip Otomasyonu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .table-responsive { max-height: 400px; overflow-y: auto; }
+        body { background-color: #f3f4f6; padding-top: 30px; font-family: sans-serif; }
+        .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .table-area { max-height: 300px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-<div class="container py-5">
+<div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-6 col-lg-5">
             
-            <div class="card p-4 mb-4">
-                <h3 class="text-center mb-4 text-primary fw-bold">STOK TAKİP SİSTEMİ</h3>
+            <div class="card p-4 mb-3">
+                <h4 class="text-center text-primary fw-bold mb-3">STOK TAKİP</h4>
                 
+                <div class="mb-2">
+                    <input type="text" id="barkod" class="form-control form-control-lg" placeholder="Barkod / Ürün Kodu">
+                </div>
+                <div class="mb-2">
+                    <input type="text" id="urunAdi" class="form-control form-control-lg" placeholder="Ürün Adı">
+                </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Barkod / Ürün Kodu</label>
-                    <input type="text" id="barkod" class="form-control form-control-lg" placeholder="Barkodu okutun veya yazın">
+                    <input type="number" id="adet" class="form-control form-control-lg" placeholder="Adet (Örn: 10)">
                 </div>
                 
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Ürün Adı</label>
-                    <input type="text" id="urunAdi" class="form-control form-control-lg" placeholder="Örn: Kağıt Havlu 12'li">
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Stok Adedi</label>
-                    <input type="number" id="adet" class="form-control form-control-lg" placeholder="0">
-                </div>
-                
-                <button onclick="stokEkle()" class="btn btn-primary btn-lg w-100 fw-bold mt-2">Ürünü Depoya Ekle</button>
+                <button onclick="stokEkle()" class="btn btn-primary btn-lg w-100 fw-bold">Depoya Ekle</button>
             </div>
 
-            <div class="card p-4">
-                <h5 class="fw-bold mb-3 text-secondary">Depodaki Ürünler</h5>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
+            <div class="card p-3">
+                <h6 class="fw-bold text-secondary mb-2">Mevcut Stok Listesi</h6>
+                <div class="table-area">
+                    <table class="table table-striped align-middle">
+                        <thead>
                             <tr>
                                 <th>Barkod</th>
-                                <th>Ürün Adı</th>
+                                <th>Ürün</th>
                                 <th class="text-end">Adet</th>
                             </tr>
                         </thead>
-                        <tbody id="stokTablosu">
+                        <tbody id="stokGövde">
                             </tbody>
                     </table>
                 </div>
@@ -60,64 +55,69 @@
 </div>
 
 <script>
-    // Sayfa yüklendiğinde hafızadaki ürünleri getir
+    // Sayfa açıldığında hafızadaki eski ürünleri yükle
     window.onload = function() {
-        listele();
+        listeyiYenile();
     };
 
     function stokEkle() {
-        let barkod = document.getElementById('barkod').value.trim();
-        let ad = document.getElementById('urunAdi').value.trim();
-        let adet = document.getElementById('adet').value.trim();
+        let barkodInput = document.getElementById('barkod');
+        let adInput = document.getElementById('urunAdi');
+        let adetInput = document.getElementById('adet');
 
-        if(!barkod || !ad || !adet) {
-            alert("Lütfen tüm alanları eksiksiz doldurun!");
+        let barkod = barkodInput.value.trim();
+        let ad = adInput.value.trim();
+        let adet = parseInt(adetInput.value);
+
+        if (!barkod || !ad || !adet || adet <= 0) {
+            alert("Lütfen tüm alanları doğru şekilde doldurun!");
             return;
         }
 
-        // LocalStorage (Tarayıcı Hafızası) Yönetimi
-        let urunler = JSON.parse(localStorage.getItem('depoStok')) || [];
-        
-        // Aynı barkod varsa adedini artır, yoksa yeni ekle
-        let varOlanUrun = urunler.find(u => u.barkod === barkod);
-        if(varOlanUrun) {
-            varOlanUrun.adet = parseInt(varOlanUrun.adet) + parseInt(adet);
+        // Tarayıcı hafızasından verileri al
+        let stoklar = JSON.parse(localStorage.getItem('depo_verileri')) || [];
+
+        // Aynı barkod varsa üstüne ekle, yoksa yeni kayıt aç
+        let bulunanUrun = stoklar.find(item => item.barkod === barkod);
+        if (bulunanUrun) {
+            bulunanUrun.adet += adet;
         } else {
-            urunler.push({ barkod: barkod, ad: ad, adet: parseInt(adet) });
+            stoklar.push({ barkod: barkod, ad: ad, adet: adet });
         }
 
-        localStorage.setItem('depoStok', JSON.stringify(urunler));
-        
-        // Formu temizle ve listeyi yenile
-        document.getElementById('barkod').value = '';
-        document.getElementById('urunAdi').value = '';
-        document.getElementById('adet').value = '';
-        
-        listele();
+        // Hafızaya geri kaydet
+        localStorage.setItem('depo_verileri', JSON.stringify(stoklar));
+
+        // Kutuları temizle
+        barkodInput.value = '';
+        adInput.value = '';
+        adetInput.value = '';
+
+        // Listeyi ekranda güncelle
+        listeyiYenile();
     }
 
-    function listele() {
-        let urunler = JSON.parse(localStorage.getItem('depoStok')) || [];
-        let tablo = document.getElementById('stokTablosu');
-        tablo.innerHTML = '';
+    function listeyiYenile() {
+        let stoklar = JSON.parse(localStorage.getItem('depo_verileri')) || [];
+        let tabloGövde = document.getElementById('stokGövde');
+        tabloGövde.innerHTML = '';
 
-        if(urunler.length === 0) {
-            tablo.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">Depoda henüz ürün yok.</td></tr>`;
+        if (stoklar.length === 0) {
+            tabloGövde.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Depoda ürün yok.</td></tr>';
             return;
         }
 
-        urunler.forEach(urun => {
-            tablo.innerHTML += `
+        stoklar.forEach(item => {
+            tabloGövde.innerHTML += `
                 <tr>
-                    <td><code>${urun.barkod}</code></td>
-                    <td class="fw-semibold">${urun.ad}</td>
-                    <td class="text-end text-success fw-bold">${urun.adet}</td>
+                    <td><small class="text-muted">${item.barkod}</small></td>
+                    <td class="fw-bold">${item.ad}</td>
+                    <td class="text-end text-primary fw-bold">${item.adet}</td>
                 </tr>
             `;
         });
     }
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
